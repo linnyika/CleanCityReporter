@@ -49,7 +49,7 @@ object UserRepository {
 
     fun findByIdentifier(input: String): User? =
         if (input.contains("@")) findByEmail(input) else findByPhone(input)
-
+    fun findById(id: Int): User? = users.find { it.id == id }
     // Returns null on success, or an error message to show
     fun registerResident(fullName: String, email: String, phone: String, password: String): String? {
         if (Validators.isStaffEmail(email)) return "This email domain is reserved for staff"
