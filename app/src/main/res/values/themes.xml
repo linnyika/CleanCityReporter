@@ -1,0 +1,13 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <!-- Base application theme. -->
+    <style name="Base.Theme.CleanCityReporter" parent="Theme.Material3.DayNight.NoActionBar">
+        <item name="colorPrimary">@color/primary</item>
+        <item name="colorOnPrimary">@android:color/white</item>
+        <item name="colorSecondary">@color/secondary</item>
+        <item name="colorOnSecondary">@android:color/white</item>
+        <item name="colorTertiary">@color/tertiary</item>
+        <item name="colorOnTertiary">@android:color/white</item>
+    </style>
+
+    <style name="Theme.CleanCityReporter" parent="Base.Theme.CleanCityReporter" />
+</resources>
