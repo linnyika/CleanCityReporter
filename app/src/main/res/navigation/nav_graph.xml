@@ -1,10 +1,27 @@
 <?xml version="1.0" encoding="utf-8"?>
 <navigation xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    app:startDestination="@id/placeholderFragment">
+    app:startDestination="@id/welcomeFragment">
 
     <fragment
-        android:id="@+id/placeholderFragment"
-        android:name="com.group2.cleancity.ui.PlaceholderFragment"
-        android:label="Placeholder" />
+        android:id="@+id/welcomeFragment"
+        android:name="com.group2.cleancity.ui.auth.WelcomeFragment"
+        android:label="Welcome">
+        <action
+            android:id="@+id/action_welcome_to_signUp"
+            app:destination="@id/signUpFragment" />
+        <action
+            android:id="@+id/action_welcome_to_login"
+            app:destination="@id/loginFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/signUpFragment"
+        android:name="com.group2.cleancity.ui.auth.SignUpFragment"
+        android:label="Sign Up" />
+
+    <fragment
+        android:id="@+id/loginFragment"
+        android:name="com.group2.cleancity.ui.auth.LoginFragment"
+        android:label="Login" />
 </navigation>
