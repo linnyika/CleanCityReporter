@@ -1,7 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <navigation xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/nav_graph"
     app:startDestination="@id/welcomeFragment">
+
+    <!-- Used by logout and by the role guard: clears everything, back to Welcome -->
+    <action
+        android:id="@+id/action_global_to_welcome"
+        app:destination="@id/welcomeFragment"
+        app:popUpTo="@id/nav_graph"
+        app:popUpToInclusive="true" />
 
     <fragment
         android:id="@+id/welcomeFragment"
@@ -37,5 +45,50 @@
     <fragment
         android:id="@+id/loginFragment"
         android:name="com.group2.cleancity.ui.auth.LoginFragment"
-        android:label="Login" />
+        android:label="Login">
+        <action
+            android:id="@+id/action_login_to_signUp"
+            app:destination="@id/signUpFragment"
+            app:popUpTo="@id/loginFragment"
+            app:popUpToInclusive="true" />
+        <action
+            android:id="@+id/action_login_to_forgotPassword"
+            app:destination="@id/forgotPasswordFragment" />
+        <!-- After login, Back must leave the app, not return to Login -->
+        <action
+            android:id="@+id/action_login_to_residentHome"
+            app:destination="@id/residentHomeFragment"
+            app:popUpTo="@id/welcomeFragment"
+            app:popUpToInclusive="true" />
+        <action
+            android:id="@+id/action_login_to_officerHome"
+            app:destination="@id/officerHomeFragment"
+            app:popUpTo="@id/welcomeFragment"
+            app:popUpToInclusive="true" />
+        <action
+            android:id="@+id/action_login_to_adminHome"
+            app:destination="@id/adminHomeFragment"
+            app:popUpTo="@id/welcomeFragment"
+            app:popUpToInclusive="true" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/forgotPasswordFragment"
+        android:name="com.group2.cleancity.ui.auth.ForgotPasswordFragment"
+        android:label="Forgot Password" />
+
+    <fragment
+        android:id="@+id/residentHomeFragment"
+        android:name="com.group2.cleancity.ui.home.ResidentHomeFragment"
+        android:label="Resident Home" />
+
+    <fragment
+        android:id="@+id/officerHomeFragment"
+        android:name="com.group2.cleancity.ui.home.OfficerHomeFragment"
+        android:label="Officer Dashboard" />
+
+    <fragment
+        android:id="@+id/adminHomeFragment"
+        android:name="com.group2.cleancity.ui.home.AdminHomeFragment"
+        android:label="Admin Dashboard" />
 </navigation>
