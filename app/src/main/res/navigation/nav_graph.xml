@@ -116,4 +116,20 @@
         android:id="@+id/adminHomeFragment"
         android:name="com.group2.cleancity.ui.home.AdminHomeFragment"
         android:label="Admin Dashboard" />
+
+    <!-- Slice 2: Resident bottom navigation destinations -->
+    <fragment
+        android:id="@+id/reportsFragment"
+        android:name="com.group2.cleancity.ui.PlaceholderFragment"
+        android:label="Reports" />
+
+    <fragment
+        android:id="@+id/alertsFragment"
+        android:name="com.group2.cleancity.ui.PlaceholderFragment"
+        android:label="Alerts" />
+
+    <fragment
+        android:id="@+id/profileFragment"
+        android:name="com.group2.cleancity.ui.profile.ProfileFragment"
+        android:label="Profile" />
 </navigation>
