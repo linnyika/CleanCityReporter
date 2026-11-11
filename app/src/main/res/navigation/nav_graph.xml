@@ -82,16 +82,42 @@
         android:name="com.group2.cleancity.ui.home.ResidentHomeFragment"
         android:label="Resident Home" />
 
+    <!-- Slice 5: Officer Dashboard -->
     <fragment
         android:id="@+id/officerHomeFragment"
-        android:name="com.group2.cleancity.ui.home.OfficerHomeFragment"
-        android:label="Officer Dashboard" />
+        android:name="com.group2.cleancity.ui.officer.OfficerDashboardFragment"
+        android:label="Officer Dashboard">
+        <action
+            android:id="@+id/action_officerHome_to_officerQueue"
+            app:destination="@id/officerReportQueueFragment" />
+    </fragment>
+
+    <!-- Slice 5: Officer Report Queue -->
+    <fragment
+        android:id="@+id/officerReportQueueFragment"
+        android:name="com.group2.cleancity.ui.officer.OfficerReportQueueFragment"
+        android:label="Report Queue">
+        <action
+            android:id="@+id/action_officerQueue_to_officerDetails"
+            app:destination="@id/officerReportDetailsFragment" />
+    </fragment>
+
+    <!-- Slice 5: Officer Report Details -->
+    <fragment
+        android:id="@+id/officerReportDetailsFragment"
+        android:name="com.group2.cleancity.ui.officer.OfficerReportDetailsFragment"
+        android:label="Report Details">
+        <argument
+            android:name="reportId"
+            app:argType="string" />
+    </fragment>
 
     <fragment
         android:id="@+id/adminHomeFragment"
         android:name="com.group2.cleancity.ui.home.AdminHomeFragment"
         android:label="Admin Dashboard" />
 
+    <!-- Slice 2: Resident bottom navigation destinations -->
     <fragment
         android:id="@+id/reportsFragment"
         android:name="com.group2.cleancity.ui.PlaceholderFragment"
