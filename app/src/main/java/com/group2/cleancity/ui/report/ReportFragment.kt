@@ -180,11 +180,11 @@ class ReportFragment : Fragment() {
             try {
 
                 val report = ReportRepository.saveReport(
-                    residentId = currentUser.id.toString(),
+                    reporter = currentUser,
                     category = selectedCategory!!,
                     description = binding.etDescription.text.toString().trim(),
-                    photoUri = selectedPhotoUri.toString(),
-                    location = binding.etLocation.text.toString().trim()
+                    photoUri = selectedPhotoUri?.toString() ?: "",
+                    locationText = binding.etLocation.text.toString().trim()
                 )
 
                 MaterialAlertDialogBuilder(requireContext())
