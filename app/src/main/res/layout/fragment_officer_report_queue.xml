@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/neutral"
+    android:orientation="vertical"
+    android:padding="16dp">
+
+    <!-- Screen Title -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Report Queue"
+        android:textColor="@color/secondary"
+        android:textSize="24sp"
+        android:textStyle="bold" />
+
+    <!-- Search Input -->
+    <com.google.android.material.textfield.TextInputLayout
+        style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:hint="Search location or keyword">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/etSearchLocation"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="text"
+            android:maxLines="1" />
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <!-- Filters Row -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:orientation="horizontal">
+
+        <Spinner
+            android:id="@+id/spinnerStatusFilter"
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:layout_marginEnd="2dp"
+            android:layout_weight="1"
+            android:background="@android:drawable/btn_dropdown" />
+
+        <Spinner
+            android:id="@+id/spinnerCategoryFilter"
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:layout_marginHorizontal="2dp"
+            android:layout_weight="1"
+            android:background="@android:drawable/btn_dropdown" />
+
+        <Spinner
+            android:id="@+id/spinnerPriorityFilter"
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:layout_marginStart="2dp"
+            android:layout_weight="1"
+            android:background="@android:drawable/btn_dropdown" />
+    </LinearLayout>
+
+    <!-- Empty State -->
+    <TextView
+        android:id="@+id/tvQueueEmpty"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="40dp"
+        android:gravity="center"
+        android:text="No reports match your filters."
+        android:textColor="#888888"
+        android:textSize="16sp"
+        android:visibility="gone" />
+
+    <!-- Reports RecyclerView -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rvOfficerReports"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_marginTop="12dp"
+        android:layout_weight="1" />
+
+</LinearLayout>

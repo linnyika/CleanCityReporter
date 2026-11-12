@@ -50,6 +50,8 @@ object UserRepository {
     fun findByIdentifier(input: String): User? =
         if (input.contains("@")) findByEmail(input) else findByPhone(input)
     fun findById(id: Int): User? = users.find { it.id == id }
+
+    fun getOfficers(): List<User> = users.filter { it.role == Role.OFFICER && it.isActive }
     // Returns null on success, or an error message to show
     fun registerResident(fullName: String, email: String, phone: String, password: String): String? {
         if (Validators.isStaffEmail(email)) return "This email domain is reserved for staff"
@@ -66,6 +68,42 @@ object UserRepository {
                 role = Role.RESIDENT
             )
         )
+        return null
+    }
+
+    //cera-had to add this to your slice1 bit
+    // Returns null on success, or an error message to show
+    fun updateProfile(userId: Int, fullName: String, phone: String): String? {
+        val index = users.indexOfFirst { it.id == userId }
+        if (index == -1) return "User not found"
+
+        val normalized = Validators.normalizePhone(phone)
+            ?: return "Enter a valid Kenyan phone number"
+
+        // The phone may already be mine, but it must not belong to someone else
+        val owner = findByPhone(normalized)
+        if (owner != null && owner.id != userId) return "This phone number is already registered"
+
+        // copy() makes a new User with only these two fields changed
+        users[index] = users[index].copy(fullName = fullName.trim(), phone = normalized)
+        return null
+    }
+
+    // Returns null on success, or an error message to show
+    fun changePassword(userId: Int, currentPassword: String, newPassword: String): String? {
+        val index = users.indexOfFirst { it.id == userId }
+        if (index == -1) return "User not found"
+
+        // Compare the typed password with the stored hash (never with plain text)
+        if (!PasswordHasher.verify(currentPassword, users[index].passwordHash)) {
+            return "Current password is incorrect"
+        }
+        if (currentPassword == newPassword) {
+            return "New password must be different from the current one"
+        }
+
+        // Store only the new hash
+        users[index] = users[index].copy(passwordHash = PasswordHasher.hash(newPassword))
         return null
     }
 
