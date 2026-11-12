@@ -4,7 +4,6 @@
     android:id="@+id/nav_graph"
     app:startDestination="@id/welcomeFragment">
 
-    <!-- Used by logout and by the role guard: clears everything, back to Welcome -->
     <action
         android:id="@+id/action_global_to_welcome"
         app:destination="@id/welcomeFragment"
@@ -15,26 +14,32 @@
         android:id="@+id/welcomeFragment"
         android:name="com.group2.cleancity.ui.auth.WelcomeFragment"
         android:label="Welcome">
+
         <action
             android:id="@+id/action_welcome_to_signUp"
             app:destination="@id/signUpFragment" />
+
         <action
             android:id="@+id/action_welcome_to_login"
             app:destination="@id/loginFragment" />
+
     </fragment>
 
     <fragment
         android:id="@+id/signUpFragment"
         android:name="com.group2.cleancity.ui.auth.SignUpFragment"
         android:label="Sign Up">
+
         <action
             android:id="@+id/action_signUp_to_login"
             app:destination="@id/loginFragment"
             app:popUpTo="@id/signUpFragment"
             app:popUpToInclusive="true" />
+
         <action
             android:id="@+id/action_signUp_to_terms"
             app:destination="@id/termsFragment" />
+
     </fragment>
 
     <fragment
@@ -46,30 +51,35 @@
         android:id="@+id/loginFragment"
         android:name="com.group2.cleancity.ui.auth.LoginFragment"
         android:label="Login">
+
         <action
             android:id="@+id/action_login_to_signUp"
             app:destination="@id/signUpFragment"
             app:popUpTo="@id/loginFragment"
             app:popUpToInclusive="true" />
+
         <action
             android:id="@+id/action_login_to_forgotPassword"
             app:destination="@id/forgotPasswordFragment" />
-        <!-- After login, Back must leave the app, not return to Login -->
+
         <action
             android:id="@+id/action_login_to_residentHome"
             app:destination="@id/residentHomeFragment"
             app:popUpTo="@id/welcomeFragment"
             app:popUpToInclusive="true" />
+
         <action
             android:id="@+id/action_login_to_officerHome"
             app:destination="@id/officerHomeFragment"
             app:popUpTo="@id/welcomeFragment"
             app:popUpToInclusive="true" />
+
         <action
             android:id="@+id/action_login_to_adminHome"
             app:destination="@id/adminHomeFragment"
             app:popUpTo="@id/welcomeFragment"
             app:popUpToInclusive="true" />
+
     </fragment>
 
     <fragment
@@ -80,7 +90,19 @@
     <fragment
         android:id="@+id/residentHomeFragment"
         android:name="com.group2.cleancity.ui.home.ResidentHomeFragment"
-        android:label="Resident Home" />
+        android:label="Resident Home">
+
+        <action
+            android:id="@+id/action_residentHome_to_report"
+            app:destination="@id/reportFragment" />
+
+    </fragment>
+
+    <!-- Slice 3: Submit a report -->
+    <fragment
+        android:id="@+id/reportFragment"
+        android:name="com.group2.cleancity.ui.report.ReportFragment"
+        android:label="Report an Issue" />
 
     <!-- Slice 5: Officer Dashboard -->
     <fragment

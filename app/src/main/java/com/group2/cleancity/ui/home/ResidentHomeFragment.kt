@@ -4,7 +4,6 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import com.group2.cleancity.R
@@ -38,9 +37,9 @@ class ResidentHomeFragment : Fragment() {
         showGreeting()
         showCounts()
 
+        // Slice 3: open the report form
         binding.cardReport.setOnClickListener {
-            // TODO (Slice 3): navigate to the Incident Logger form
-            Toast.makeText(requireContext(), "Report form coming soon", Toast.LENGTH_SHORT).show()
+            findNavController().navigate(R.id.action_residentHome_to_report)
         }
     }
 

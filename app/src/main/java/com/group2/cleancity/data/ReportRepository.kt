@@ -1,5 +1,6 @@
 package com.group2.cleancity.data
 
+import com.group2.cleancity.model.Category
 import com.group2.cleancity.model.Priority
 import com.group2.cleancity.model.Report
 import com.group2.cleancity.model.ReportStatus
@@ -18,6 +19,9 @@ object ReportRepository {
     // Internal mutable list holding status change audit trails
     private val statusChanges = mutableListOf<StatusChange>()
     private var nextStatusChangeId = 1
+
+    // ADDED (slice 3): lets the group demo the "submission failed" rule
+    var forceSaveFailure = false
 
     init {
         // Seed sample reports for testing Officer Queue and Dashboard immediately
@@ -117,6 +121,53 @@ object ReportRepository {
 
     // Finds a report by its unique String ID (e.g., "NRB-0001")
     fun getReportById(id: String): Report? = reports.find { it.id.equals(id, ignoreCase = true) }
+
+    // ADDED (slice 4 will need this): only one resident's own reports
+    fun getReportsByReporter(reporterId: Int): List<Report> =
+        reports.filter { it.reporterId == reporterId }
+
+    /**
+     * ADDED (slice 3): creates and saves a new report for a resident.
+     * Gets the next ID after the seeded ones (NRB-0005, NRB-0006, ...),
+     * starts the report as SUBMITTED, and records the first status change.
+     * Throws an exception if saving fails, so the screen never shows false success.
+     */
+    fun saveReport(
+        reporter: User,
+        category: Category,
+        description: String,
+        photoUri: String,
+        locationText: String
+    ): Report {
+        if (forceSaveFailure) {
+            throw Exception("Unable to save report. Please try again.")
+        }
+
+        val now = System.currentTimeMillis()
+        val reportId = "NRB-${(reports.size + 1).toString().padStart(4, '0')}"
+
+        val report = Report(
+            id = reportId,
+            reporterId = reporter.id,
+            reporterName = reporter.fullName,
+            reporterContact = reporter.phone,
+            categoryName = category.name,
+            description = description.trim(),
+            photoUri = photoUri,
+            locationText = locationText.trim(),
+            status = ReportStatus.SUBMITTED,
+            priority = category.defaultPriority,
+            createdAt = now,
+            updatedAt = now
+        )
+
+        reports.add(report)
+        recordStatusChange(
+            reportId, null, ReportStatus.SUBMITTED,
+            reporter.id, reporter.fullName, "Initial submission"
+        )
+        return report
+    }
 
     // DASHBOARD METRIC HELPERS:
 
