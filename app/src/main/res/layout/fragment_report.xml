@@ -1,0 +1,206 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#F2F5F3"
+    android:fillViewport="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="20dp">
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnBackToDashboard"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="← Back to Dashboard"
+            android:textColor="#10465A"
+            app:backgroundTint="#F2F5F3"
+            app:cornerRadius="12dp" />
+
+        <!-- Screen heading -->
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Report a Sanitation Issue"
+            android:textColor="#10465A"
+            android:textSize="24sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="Help keep Nairobi clean. Tell us about the problem you have spotted."
+            android:textColor="#666666"
+            android:textSize="14sp" />
+
+        <!-- Category selection -->
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:text="Issue Category *"
+            android:textColor="#10465A"
+            android:textStyle="bold"
+            android:textSize="16sp" />
+
+        <LinearLayout
+            android:id="@+id/categoryContainer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:orientation="vertical"
+            />
+
+        <TextView
+            android:id="@+id/categoryError"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="#D32F2F"
+            android:textSize="12sp"
+            android:visibility="gone" />
+
+        <!-- Description -->
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:text="Description *"
+            android:textColor="#10465A"
+            android:textStyle="bold"
+            android:textSize="16sp" />
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            app:counterEnabled="true"
+            app:counterMaxLength="300"
+            app:boxBackgroundMode="outline">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/etDescription"
+                android:layout_width="match_parent"
+                android:layout_height="130dp"
+                android:gravity="top"
+                android:hint="Describe the sanitation problem..."
+                android:inputType="textMultiLine"
+                android:maxLength="300" />
+
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <TextView
+            android:id="@+id/descriptionError"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="#D32F2F"
+            android:textSize="12sp"
+            android:visibility="gone" />
+
+        <!-- Photograph -->
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:text="Attach Photograph *"
+            android:textColor="#10465A"
+            android:textStyle="bold"
+            android:textSize="16sp" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnTakePhoto"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="Take Photo"
+            app:icon="@android:drawable/ic_menu_camera" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnChooseGallery"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Choose from Gallery"
+            app:backgroundTint="#10465A" />
+
+        <ImageView
+            android:id="@+id/ivReportPhoto"
+            android:layout_width="match_parent"
+            android:layout_height="200dp"
+            android:layout_marginTop="12dp"
+            android:scaleType="centerCrop"
+            android:contentDescription="Selected report photograph"
+            android:visibility="gone" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnRemovePhoto"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Remove Photo"
+            android:visibility="gone"
+            app:backgroundTint="#D32F2F" />
+
+        <TextView
+            android:id="@+id/photoError"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="#D32F2F"
+            android:textSize="12sp"
+            android:visibility="gone" />
+
+        <!-- Location -->
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:text="Location *"
+            android:textColor="#10465A"
+            android:textStyle="bold"
+            android:textSize="16sp" />
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            app:boxBackgroundMode="outline">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/etLocation"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="e.g. Argwings Kodhek Rd, Kilimani"
+                android:inputType="textCapSentences" />
+
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <TextView
+            android:id="@+id/locationError"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="#D32F2F"
+            android:textSize="12sp"
+            android:visibility="gone" />
+
+        <!-- Submit -->
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnSubmitReport"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:layout_marginTop="28dp"
+            android:layout_marginBottom="24dp"
+            android:text="Submit Report"
+            android:textSize="16sp"
+            app:backgroundTint="#168447" />
+
+    </LinearLayout>
+
+</ScrollView>
