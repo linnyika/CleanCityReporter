@@ -142,8 +142,19 @@
     <!-- Slice 2: Resident bottom navigation destinations -->
     <fragment
         android:id="@+id/reportsFragment"
-        android:name="com.group2.cleancity.ui.PlaceholderFragment"
+        android:name="com.group2.cleancity.ui.report.MyReportsFragment"
         android:label="Reports" />
+
+    <!-- Slice 4: Resident report details -->
+    <fragment
+        android:id="@+id/residentReportDetailsFragment"
+        android:name="com.group2.cleancity.ui.report.ResidentReportDetailsFragment"
+        android:label="Report Details">
+        <argument
+            android:name="reportId"
+            app:argType="string" />
+    </fragment>
+
 
     <fragment
         android:id="@+id/alertsFragment"
