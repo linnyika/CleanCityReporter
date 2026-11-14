@@ -1,0 +1,10 @@
+ .idea/misc.xml                                     |   2 [32m+[m[31m-[m
+ .../group2/cleancity/ui/report/MyReportAdapter.kt  |  96 [32m++++++++++++[m
+ .../cleancity/ui/report/MyReportsFragment.kt       | 127 [32m++++++++++++++++[m
+ .../ui/report/ResidentReportDetailsFragment.kt     | 161 [32m+++++++++++++++++++++[m
+ app/src/main/res/layout/fragment_my_reports.xml    | 125 [32m++++++++++++++++[m
+ .../layout/fragment_resident_report_details.xml    | 156 [32m++++++++++++++++++++[m
+ app/src/main/res/layout/item_my_report.xml         |  92 [32m++++++++++++[m
+ app/src/main/res/navigation/nav_graph.xml          |  13 [32m+[m[31m-[m
+ gradle/libs.versions.toml                          |   2 [32m+[m[31m-[m
+ 9 files changed, 771 insertions(+), 3 deletions(-)
