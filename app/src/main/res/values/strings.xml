@@ -19,4 +19,13 @@
         Account security\nKeep your password private.
         Staff accounts cannot be created through Sign Up.\n\n8.
         Changes\nThese terms may change as the project develops.</string>
+
+
+    <string-array name="category_priorities">
+        <item>Low</item>
+        <item>Medium</item>
+        <item>High</item>
+        <item>Urgent</item>
+    </string-array>
+
 </resources>

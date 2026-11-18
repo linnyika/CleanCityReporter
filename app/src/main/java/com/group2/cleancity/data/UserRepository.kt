@@ -4,6 +4,7 @@ import com.group2.cleancity.model.Role
 import com.group2.cleancity.model.User
 import com.group2.cleancity.util.PasswordHasher
 import com.group2.cleancity.util.Validators
+import com.group2.cleancity.data.SessionManager
 
 // The possible outcomes of a login attempt
 sealed class LoginResult {
@@ -51,6 +52,8 @@ object UserRepository {
         if (input.contains("@")) findByEmail(input) else findByPhone(input)
     fun findById(id: Int): User? = users.find { it.id == id }
 
+    fun getAllUsers(): List<User> = users.toList()
+
     fun getOfficers(): List<User> = users.filter { it.role == Role.OFFICER && it.isActive }
     // Returns null on success, or an error message to show
     fun registerResident(fullName: String, email: String, phone: String, password: String): String? {
@@ -70,6 +73,114 @@ object UserRepository {
         )
         return null
     }
+
+
+    fun createOfficer(
+        fullName: String,
+        email: String,
+        phone: String,
+        password: String
+    ): String? {
+
+        if (fullName.isBlank()) return "Enter the officer's full name"
+
+        if (!Validators.isStaffEmail(email)) {
+            return "Officer email must use @cleancityreporter.com"
+        }
+
+        if (findByEmail(email) != null) {
+            return "This email is already registered"
+        }
+
+        val normalizedPhone = Validators.normalizePhone(phone)
+            ?: return "Enter a valid Kenyan phone number"
+
+        if (findByPhone(normalizedPhone) != null) {
+            return "This phone number is already registered"
+        }
+
+        if (password.isBlank()) {
+            return "Enter a password"
+        }
+
+        users.add(
+            User(
+                id = nextId++,
+                fullName = fullName.trim(),
+                email = email.trim().lowercase(),
+                phone = normalizedPhone,
+                passwordHash = PasswordHasher.hash(password),
+                role = Role.OFFICER
+            )
+        )
+
+        return null
+    }
+
+
+    fun updateUserStatus(
+        userId: Int,
+        isActive: Boolean,
+        actingAdminId: Int
+    ): String? {
+        val index = users.indexOfFirst { it.id == userId }
+        if (index == -1) return "User not found"
+
+        val user = users[index]
+
+        if (!isActive && userId == actingAdminId) {
+            return "You cannot deactivate your own account"
+        }
+
+        if (!isActive && user.role == Role.ADMIN) {
+            val activeAdmins = users.count {
+                it.role == Role.ADMIN && it.isActive
+            }
+
+            if (activeAdmins <= 1) {
+                return "You cannot deactivate the last active administrator"
+            }
+        }
+
+        val updatedUser = user.copy(isActive = isActive)
+        users[index] = updatedUser
+        SessionManager.refresh(updatedUser)
+
+        return null
+    }
+
+    fun updateUserRole(
+        userId: Int,
+        newRole: Role,
+        actingAdminId: Int
+    ): String? {
+        val index = users.indexOfFirst { it.id == userId }
+        if (index == -1) return "User not found"
+
+        val user = users[index]
+
+        if (userId == actingAdminId) {
+            return "You cannot change your own role"
+        }
+
+        if (user.role == Role.ADMIN && newRole != Role.ADMIN && user.isActive) {
+            val activeAdmins = users.count {
+                it.role == Role.ADMIN && it.isActive
+            }
+
+            if (activeAdmins <= 1) {
+                return "You cannot remove the role of the last active administrator"
+            }
+        }
+
+        val updatedUser = user.copy(role = newRole)
+        users[index] = updatedUser
+        SessionManager.refresh(updatedUser)
+
+        return null
+    }
+
+
 
     //cera-had to add this to your slice1 bit
     // Returns null on success, or an error message to show
