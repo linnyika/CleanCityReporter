@@ -134,10 +134,73 @@
             app:argType="string" />
     </fragment>
 
+    <!-- Slice 6: Admin Dashboard -->
     <fragment
         android:id="@+id/adminHomeFragment"
         android:name="com.group2.cleancity.ui.home.AdminHomeFragment"
-        android:label="Admin Dashboard" />
+        android:label="Admin Dashboard">
+
+        <action
+            android:id="@+id/action_adminHome_to_userManagement"
+            app:destination="@id/userManagementFragment" />
+
+        <action
+            android:id="@+id/action_adminHome_to_categoryManagement"
+            app:destination="@id/categoryManagementFragment" />
+
+        <action
+            android:id="@+id/action_adminHome_to_systemSettings"
+            app:destination="@id/systemSettingsFragment" />
+
+        <action
+            android:id="@+id/action_adminHome_to_reportManagement"
+            app:destination="@id/reportManagementFragment" />
+
+        <action
+            android:id="@+id/action_adminHome_to_adminAnalytics"
+            app:destination="@id/adminAnalyticsFragment" />
+
+        <action
+            android:id="@+id/action_adminHome_to_auditHistory"
+            app:destination="@id/auditHistoryFragment" />
+
+    </fragment>
+
+    <!-- Slice 6: Admin Category Management -->
+    <fragment
+        android:id="@+id/categoryManagementFragment"
+        android:name="com.group2.cleancity.ui.admin.CategoryManagementFragment"
+        android:label="Category Management" />
+
+    <!-- Slice 6: Admin User Management -->
+    <fragment
+        android:id="@+id/userManagementFragment"
+        android:name="com.group2.cleancity.ui.admin.UserManagementFragment"
+        android:label="User Management" />
+
+    <!-- Slice 6: Admin System Settings -->
+    <fragment
+        android:id="@+id/systemSettingsFragment"
+        android:name="com.group2.cleancity.ui.admin.SystemSettingsFragment"
+        android:label="System Settings" />
+
+    <!-- Slice 6: Admin Report Management -->
+    <fragment
+        android:id="@+id/reportManagementFragment"
+        android:name="com.group2.cleancity.ui.admin.ReportManagementFragment"
+        android:label="Report Management" />
+
+    <!-- Slice 6: Admin Analytics -->
+    <fragment
+        android:id="@+id/adminAnalyticsFragment"
+        android:name="com.group2.cleancity.ui.admin.AdminAnalyticsFragment"
+        android:label="Admin Analytics" />
+
+    <!-- Slice 6: Admin Audit History -->
+    <fragment
+        android:id="@+id/auditHistoryFragment"
+        android:name="com.group2.cleancity.ui.admin.AuditHistoryFragment"
+        android:label="Audit History" />
 
     <!-- Slice 2: Resident bottom navigation destinations -->
     <fragment
@@ -155,7 +218,6 @@
             app:argType="string" />
     </fragment>
 
-
     <fragment
         android:id="@+id/alertsFragment"
         android:name="com.group2.cleancity.ui.PlaceholderFragment"
@@ -165,4 +227,5 @@
         android:id="@+id/profileFragment"
         android:name="com.group2.cleancity.ui.profile.ProfileFragment"
         android:label="Profile" />
+
 </navigation>
