@@ -7,13 +7,16 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.group2.cleancity.R
+import com.group2.cleancity.data.ReportRepository
 import com.group2.cleancity.data.SessionManager
 import com.group2.cleancity.data.UserRepository
 import com.group2.cleancity.databinding.FragmentProfileBinding
+import com.group2.cleancity.model.ReportStatus
 import com.group2.cleancity.model.Role
 import com.group2.cleancity.util.Validators
-import com.google.android.material.dialog.MaterialAlertDialogBuilder
+
 class ProfileFragment : Fragment() {
 
     private var _binding: FragmentProfileBinding? = null
@@ -31,38 +34,61 @@ class ProfileFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // Guard: only a signed-in Resident may be here
-        if (!SessionManager.hasRole(Role.RESIDENT)) {
+        // Guard: check if any user is logged in
+        if (!SessionManager.isLoggedIn) {
             findNavController().navigate(R.id.action_global_to_welcome)
             return
         }
 
         showCurrentDetails()
-        showImpact()
+        setupRoleSpecificViews()
         binding.btnSaveProfile.setOnClickListener { saveProfile() }
         binding.btnChangePassword.setOnClickListener { changePassword() }
         binding.btnLogout.setOnClickListener { confirmLogout() }
     }
 
+    override fun onResume() {
+        super.onResume()
+        if (_binding != null && SessionManager.isLoggedIn) {
+            showCurrentDetails()
+            setupRoleSpecificViews()
+        }
+    }
+
+    private fun setupRoleSpecificViews() {
+        val user = SessionManager.currentUser ?: return
+        if (user.role == Role.RESIDENT) {
+            binding.cardImpact.visibility = View.VISIBLE
+            showImpact()
+        } else {
+            binding.cardImpact.visibility = View.GONE
+        }
+    }
+
     private fun showImpact() {
-        // TODO (Slice 4): get these two numbers from ReportRepository
-        val submitted = 0
-        val resolved = 0
+        val user = SessionManager.currentUser ?: return
+        if (user.role != Role.RESIDENT) return
+
+        val myReports = ReportRepository.getReportsByReporter(user.id)
+        val submitted = myReports.size
+        val resolved = myReports.count { it.status == ReportStatus.RESOLVED }
 
         binding.tvImpactSubmitted.text = submitted.toString()
         binding.tvImpactResolved.text = resolved.toString()
         binding.tvImpactLevel.text = "Level: ${participationLevel(submitted)}"
     }
 
-    // Turns a report count into a level name. Order matters: biggest check first.
+    // Turns a report count into a level name based on participation thresholds.
     private fun participationLevel(reportCount: Int): String = when {
-        reportCount >= 10 -> "Champion"
-        reportCount >= 3 -> "Active"
-        else -> "Starter"
+        reportCount >= 6 -> "Champion"
+        reportCount in 3..5 -> "Active"
+        reportCount in 1..2 -> "Starter"
+        else -> "Newcomer"
     }
 
     private fun showCurrentDetails() {
         val user = SessionManager.currentUser ?: return
+        binding.tvRole.text = user.role.name
         binding.tvEmail.text = user.email
         binding.etFullName.setText(user.fullName)
         binding.etPhone.setText(user.phone)
@@ -127,7 +153,7 @@ class ProfileFragment : Fragment() {
     private fun confirmLogout() {
         MaterialAlertDialogBuilder(requireContext())
             .setTitle("Log out")
-            .setMessage("Are you sure you want to log out?")
+            .setMessage("Log out of Clean City Reporter?")
             .setNegativeButton("Cancel", null)   // null = just close the dialog
             .setPositiveButton("Log Out") { _, _ -> logout() }
             .show()

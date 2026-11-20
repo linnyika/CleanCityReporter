@@ -20,8 +20,9 @@
             android:textSize="26sp"
             android:textStyle="bold" />
 
-        <!-- My Impact -->
+        <!-- My Impact (Visible only for Residents) -->
         <com.google.android.material.card.MaterialCardView
+            android:id="@+id/cardImpact"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
@@ -105,11 +106,28 @@
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
-        <!-- Email: shown, not editable -->
+        <!-- Role: shown, not editable -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="20dp"
+            android:text="Role"
+            android:textColor="#4A524E"
+            android:textSize="12sp" />
+
+        <TextView
+            android:id="@+id/tvRole"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/primary"
+            android:textSize="16sp"
+            android:textStyle="bold" />
+
+        <!-- Email: shown, not editable -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
             android:text="Email"
             android:textColor="#4A524E"
             android:textSize="12sp" />

@@ -91,6 +91,14 @@ class OfficerReportQueueFragment : Fragment() {
         statusAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         binding.spinnerStatusFilter.adapter = statusAdapter
 
+        val initialStatus = arguments?.getString("filterStatus")
+        if (initialStatus != null) {
+            val pos = statusOptions.indexOf(initialStatus)
+            if (pos >= 0) {
+                binding.spinnerStatusFilter.setSelection(pos)
+            }
+        }
+
         // Build Category filter options ("All Categories" + categories present in reports)
         val categoryOptions = mutableListOf("All Categories")
         categoryOptions.addAll(ReportRepository.getAllReports().map { it.categoryName }.distinct())
@@ -134,6 +142,19 @@ class OfficerReportQueueFragment : Fragment() {
     private fun applyFilters() {
         // Step 1: Start with all reports from the repository
         var reports = ReportRepository.getAllReports()
+
+        val filterType = arguments?.getString("filterType")
+        if (filterType == "ASSIGNED") {
+            val currentOfficerId = SessionManager.currentUser?.id
+            if (currentOfficerId != null) {
+                reports = reports.filter { it.assignedOfficerId == currentOfficerId && it.status != ReportStatus.RESOLVED }
+            }
+        } else if (filterType == "UNRESOLVED") {
+            reports = reports.filter { it.status != ReportStatus.RESOLVED }
+        } else if (filterType == "OVERDUE") {
+            val sevenDaysAgo = System.currentTimeMillis() - (7 * 24 * 60 * 60 * 1000L)
+            reports = reports.filter { it.status != ReportStatus.RESOLVED && it.createdAt < sevenDaysAgo }
+        }
 
         // Step 2: Apply text query matching against location, report ID, category, or description
         val query = binding.etSearchLocation.text?.toString()?.trim() ?: ""

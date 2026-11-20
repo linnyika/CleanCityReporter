@@ -202,6 +202,18 @@
         android:name="com.group2.cleancity.ui.admin.AuditHistoryFragment"
         android:label="Audit History" />
 
+    <!-- Admin Manage hub -->
+    <fragment
+        android:id="@+id/adminManageFragment"
+        android:name="com.group2.cleancity.ui.admin.AdminManageFragment"
+        android:label="Manage" />
+
+    <!-- Admin Reports hub -->
+    <fragment
+        android:id="@+id/adminReportsFragment"
+        android:name="com.group2.cleancity.ui.admin.AdminReportsFragment"
+        android:label="Reports" />
+
     <!-- Slice 2: Resident bottom navigation destinations -->
     <fragment
         android:id="@+id/reportsFragment"
@@ -222,6 +234,11 @@
         android:id="@+id/alertsFragment"
         android:name="com.group2.cleancity.ui.PlaceholderFragment"
         android:label="Alerts" />
+
+    <fragment
+        android:id="@+id/officerAssignedFragment"
+        android:name="com.group2.cleancity.ui.officer.OfficerAssignedFragment"
+        android:label="Assigned Reports" />
 
     <fragment
         android:id="@+id/profileFragment"
