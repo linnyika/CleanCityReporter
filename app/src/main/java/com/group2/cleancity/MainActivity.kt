@@ -1,9 +1,15 @@
 package com.group2.cleancity
 
+import android.Manifest
+import android.content.Context
+import android.content.Intent
+import android.os.Build
 import android.os.Bundle
 import android.view.View
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.navigation.NavOptions
@@ -12,10 +18,35 @@ import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.setupWithNavController
 import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.bottomnavigation.BottomNavigationView
+import com.group2.cleancity.data.NotificationRepository
+import com.group2.cleancity.data.ReportRepository
 import com.group2.cleancity.data.SessionManager
 import com.group2.cleancity.model.Role
+import com.group2.cleancity.util.NotificationHelper
 
 class MainActivity : AppCompatActivity() {
+
+    private val notificationPermissionLauncher =
+        registerForActivityResult(ActivityResultContracts.RequestPermission()) { }
+
+    private fun requestNotificationPermissionOnceForResident() {
+        val resident = SessionManager.currentUser
+        if (resident == null || resident.role != Role.RESIDENT) return
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) return
+
+        val prefs = getSharedPreferences("notification_permission_prefs", Context.MODE_PRIVATE)
+        if (prefs.getBoolean("resident_permission_requested", false)) return
+
+        val granted = ContextCompat.checkSelfPermission(
+            this,
+            Manifest.permission.POST_NOTIFICATIONS
+        ) == android.content.pm.PackageManager.PERMISSION_GRANTED
+
+        if (!granted) {
+            prefs.edit().putBoolean("resident_permission_requested", true).apply()
+            notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -32,7 +63,32 @@ class MainActivity : AppCompatActivity() {
 
         setupNavigation()
 
+        NotificationHelper.createChannel(this)
+        requestNotificationPermissionOnceForResident()
+
         if (savedInstanceState == null) openHomeIfLoggedIn()
+        handleOpenReportIntent(intent)
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+        handleOpenReportIntent(intent)
+    }
+
+    private fun handleOpenReportIntent(intent: Intent) {
+        val reportId = intent.getStringExtra("open_report_id") ?: return
+        val resident = SessionManager.currentUser
+        if (resident == null || resident.role != Role.RESIDENT) return
+
+        val report = ReportRepository.getReportById(reportId)
+        if (report == null || report.reporterId != resident.id) return
+
+        val navHost = supportFragmentManager
+            .findFragmentById(R.id.nav_host_fragment) as NavHostFragment
+        val arguments = Bundle().apply { putString("reportId", reportId) }
+        navHost.navController.navigate(R.id.residentReportDetailsFragment, arguments)
+        intent.removeExtra("open_report_id")
     }
 
     private fun setupNavigation() {
@@ -61,8 +117,8 @@ class MainActivity : AppCompatActivity() {
 
             Role.ADMIN -> setOf(
                 R.id.adminHomeFragment,
-                R.id.adminManageFragment,
-                R.id.adminReportsFragment,
+                R.id.adminManageHubFragment,
+                R.id.adminReportsHubFragment,
                 R.id.profileFragment
             )
 
@@ -119,8 +175,8 @@ class MainActivity : AppCompatActivity() {
                     R.menu.menu_admin,
                     setOf(
                         R.id.adminHomeFragment,
-                        R.id.adminManageFragment,
-                        R.id.adminReportsFragment,
+                        R.id.adminManageHubFragment,
+                        R.id.adminReportsHubFragment,
                         R.id.profileFragment
                     )
                 )
@@ -140,6 +196,8 @@ class MainActivity : AppCompatActivity() {
             } else {
                 bottomNav.visibility = View.GONE
             }
+
+            updateResidentAlertsBadge(bottomNav)
         }
 
         toolbar.setNavigationOnClickListener {
@@ -163,5 +221,57 @@ class MainActivity : AppCompatActivity() {
             .build()
 
         navHost.navController.navigate(homeId, null, options)
+        postResidentNotifications()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        requestNotificationPermissionOnceForResident()
+        updateResidentAlertsBadge(findViewById(R.id.bottomNav))
+        postResidentNotifications()
+    }
+
+    private fun postResidentNotifications() {
+        val resident = SessionManager.currentUser ?: return
+        if (SessionManager.role != Role.RESIDENT) return
+        if (!NotificationHelper.areNotificationsAllowed(this)) return
+
+        val unposted = NotificationRepository.getUnposted(resident.id)
+        if (unposted.isEmpty()) return
+
+        if (unposted.size > 3) {
+            NotificationHelper.show(
+                this,
+                "summary_${resident.id}_${System.currentTimeMillis()}",
+                "You have ${unposted.size} new updates"
+            )
+            unposted.forEach { NotificationRepository.markPosted(it.id) }
+        } else {
+            unposted.forEach { notification ->
+                NotificationHelper.show(
+                    this,
+                    notification.reportId,
+                    notification.message
+                )
+                NotificationRepository.markPosted(notification.id)
+            }
+        }
+    }
+
+    private fun updateResidentAlertsBadge(bottomNav: BottomNavigationView) {
+        val resident = SessionManager.currentUser
+        if (SessionManager.role != Role.RESIDENT || resident == null) {
+            bottomNav.removeBadge(R.id.alertsFragment)
+            return
+        }
+
+        val count = NotificationRepository.unreadCount(resident.id)
+        if (count == 0) {
+            bottomNav.removeBadge(R.id.alertsFragment)
+        } else {
+            val badge = bottomNav.getOrCreateBadge(R.id.alertsFragment)
+            badge.number = count
+            badge.isVisible = true
+        }
     }
 }

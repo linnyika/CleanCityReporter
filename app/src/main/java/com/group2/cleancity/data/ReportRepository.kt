@@ -209,18 +209,13 @@ object ReportRepository {
         val report = getReportById(reportId) ?: return false
         if (report.status != ReportStatus.SUBMITTED) return false
 
-        val oldStatus = report.status
-        report.status = ReportStatus.ACKNOWLEDGED
         if (report.assignedOfficerId == null) {
             report.assignedOfficerId = officer.id
             report.assignedOfficerName = officer.fullName
         }
-        report.updatedAt = System.currentTimeMillis()
 
-        // Log status change history & system audit
-        recordStatusChange(reportId, oldStatus, ReportStatus.ACKNOWLEDGED, officer.id, officer.fullName, "Acknowledged report")
-        AuditRepository.log("ACKNOWLEDGE_REPORT", "Report $reportId acknowledged", officer.id, officer.fullName)
-        return true
+        val err = updateStatus(reportId, ReportStatus.ACKNOWLEDGED, officer, null)
+        return err == null
     }
 
     // Assigns an officer to a report
@@ -232,6 +227,7 @@ object ReportRepository {
 
         // Log system audit
         AuditRepository.log("ASSIGN_OFFICER", "Report $reportId assigned to $officerName", assignedBy.id, assignedBy.fullName)
+        NotificationRepository.add(report.reporterId, reportId, "$reportId has been assigned to $officerName")
         return true
     }
 
@@ -262,6 +258,16 @@ object ReportRepository {
         // Step 3: Record status change history & audit entry
         recordStatusChange(reportId, oldStatus, nextStatus, officer.id, officer.fullName, resolutionNotes)
         AuditRepository.log("STATUS_UPDATE", "Report $reportId status changed from $oldStatus to $nextStatus", officer.id, officer.fullName)
+        
+        if (nextStatus == ReportStatus.ACKNOWLEDGED) {
+            NotificationRepository.add(report.reporterId, reportId, "$reportId has been acknowledged")
+        }
+        if (nextStatus == ReportStatus.IN_PROGRESS) {
+            NotificationRepository.add(report.reporterId, reportId, "$reportId is now In Progress")
+        }
+        if (nextStatus == ReportStatus.RESOLVED) {
+            NotificationRepository.add(report.reporterId, reportId, "$reportId has been resolved")
+        }
         return null
     }
 

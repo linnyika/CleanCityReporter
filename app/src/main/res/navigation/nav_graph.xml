@@ -204,14 +204,14 @@
 
     <!-- Admin Manage hub -->
     <fragment
-        android:id="@+id/adminManageFragment"
-        android:name="com.group2.cleancity.ui.admin.AdminManageFragment"
+        android:id="@+id/adminManageHubFragment"
+        android:name="com.group2.cleancity.ui.admin.AdminManageHubFragment"
         android:label="Manage" />
 
     <!-- Admin Reports hub -->
     <fragment
-        android:id="@+id/adminReportsFragment"
-        android:name="com.group2.cleancity.ui.admin.AdminReportsFragment"
+        android:id="@+id/adminReportsHubFragment"
+        android:name="com.group2.cleancity.ui.admin.AdminReportsHubFragment"
         android:label="Reports" />
 
     <!-- Slice 2: Resident bottom navigation destinations -->
@@ -232,8 +232,12 @@
 
     <fragment
         android:id="@+id/alertsFragment"
-        android:name="com.group2.cleancity.ui.PlaceholderFragment"
-        android:label="Alerts" />
+        android:name="com.group2.cleancity.ui.alerts.AlertsFragment"
+        android:label="Alerts">
+        <action
+            android:id="@+id/action_alerts_to_residentReportDetails"
+            app:destination="@id/residentReportDetailsFragment" />
+    </fragment>
 
     <fragment
         android:id="@+id/officerAssignedFragment"
