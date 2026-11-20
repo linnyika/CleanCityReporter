@@ -53,8 +53,12 @@ class MyReportAdapter(
 
             // Reset the image first because this row view may have been recycled.
             binding.imageReportThumbnail.setImageResource(android.R.drawable.ic_menu_gallery)
-            if (!report.photoUri.isNullOrBlank()) {
-                binding.imageReportThumbnail.setImageURI(Uri.parse(report.photoUri))
+            if (report.photoUri != null) {
+                try {
+                    binding.imageReportThumbnail.setImageURI(Uri.parse(report.photoUri))
+                } catch (_: Exception) {
+                    binding.imageReportThumbnail.setImageResource(android.R.drawable.ic_menu_gallery)
+                }
             }
 
             styleStatusBadge(report.status)

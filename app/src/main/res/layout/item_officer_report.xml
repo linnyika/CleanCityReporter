@@ -91,6 +91,20 @@
                 android:textColor="#C62828"
                 android:textSize="11sp"
                 android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/tvOverdueLabel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="6dp"
+                android:background="#C62828"
+                android:paddingHorizontal="8dp"
+                android:paddingVertical="3dp"
+                android:text="Overdue"
+                android:textColor="@android:color/white"
+                android:textSize="11sp"
+                android:textStyle="bold"
+                android:visibility="gone" />
         </LinearLayout>
 
     </LinearLayout>

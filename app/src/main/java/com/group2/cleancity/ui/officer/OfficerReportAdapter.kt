@@ -91,6 +91,11 @@ class OfficerReportAdapter(
                 }
             }
 
+            // Only submitted reports older than seven days receive the overdue label.
+            val sevenDaysAgo = System.currentTimeMillis() - (7L * 24 * 60 * 60 * 1000)
+            val isOverdue = report.status == ReportStatus.SUBMITTED && report.createdAt < sevenDaysAgo
+            binding.tvOverdueLabel.visibility = if (isOverdue) android.view.View.VISIBLE else android.view.View.GONE
+
             // Register click listener on card item root view
             binding.root.setOnClickListener {
                 onItemClick(report) // Trigger lambda callback passed from Fragment

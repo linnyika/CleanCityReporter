@@ -4,90 +4,168 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
+import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.group2.cleancity.R
 import com.group2.cleancity.data.ReportRepository
 import com.group2.cleancity.data.SessionManager
 import com.group2.cleancity.databinding.FragmentOfficerDashboardBinding
+import com.group2.cleancity.model.ReportStatus
 import com.group2.cleancity.model.Role
 
-/**
- * Main landing dashboard for Response Officers.
- * Displays key report statistics, officer profile details, and navigation to the report queue.
- */
 class OfficerDashboardFragment : Fragment() {
 
-    // View Binding property: holds the reference to generated UI elements in fragment_officer_dashboard.xml
     private var _binding: FragmentOfficerDashboardBinding? = null
-    // Non-null accessor for binding that is valid only between onCreateView and onDestroyView
     private val binding get() = _binding!!
 
-    // Called by Android framework to create and inflate the Fragment's layout view tree
+    private var needsAttentionAdapter: OfficerReportAdapter? = null
+    private var assignedAdapter: OfficerReportAdapter? = null
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        // Inflate layout XML using view binding (replaces findViewById)
         _binding = FragmentOfficerDashboardBinding.inflate(inflater, container, false)
         return binding.root
     }
 
-    // Called immediately after onCreateView when the view hierarchy is fully created
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // SECURITY ROLE GUARD: Check if the currently logged-in user is an OFFICER
-        // If not, block access, display an alert Toast, and redirect back to the Welcome screen
         if (!SessionManager.hasRole(Role.OFFICER)) {
-            Toast.makeText(requireContext(), "Unauthorized access: Officer role required", Toast.LENGTH_SHORT).show()
             findNavController().navigate(R.id.action_global_to_welcome)
-            return // Stop further execution
+            return
         }
 
-        // Retrieve current active user session
-        val user = SessionManager.currentUser ?: return
+        setupRecyclerViews()
+        showGreeting()
+        updateDashboard()
 
-        // Populate officer personal profile card on the UI
-        binding.tvOfficerWelcome.text = "Welcome back, ${user.fullName}"
-        binding.tvOfficerEmail.text = "Email: ${user.email}"
-        binding.tvOfficerPhone.text = "Phone: ${user.phone}"
+        binding.cardIncoming.setOnClickListener {
+            val bundle = bundleOf("filterStatus" to "SUBMITTED")
+            findNavController().navigate(R.id.action_officerHome_to_officerQueue, bundle)
+        }
 
-        // Fetch and display real-time dashboard counts from ReportRepository
-        refreshDashboardMetrics(user.id)
+        binding.cardAssigned.setOnClickListener {
+            findNavController().navigate(R.id.officerAssignedFragment)
+        }
 
-        // Set click listener on 'View Report Queue' button to open OfficerReportQueueFragment
+        binding.cardInProgress.setOnClickListener {
+            val bundle = bundleOf("filterStatus" to "IN_PROGRESS")
+            findNavController().navigate(R.id.action_officerHome_to_officerQueue, bundle)
+        }
+
+        binding.cardUnresolved.setOnClickListener {
+            val bundle = bundleOf("filterType" to "UNRESOLVED")
+            findNavController().navigate(R.id.action_officerHome_to_officerQueue, bundle)
+        }
+
+        binding.cardOverdue.setOnClickListener {
+            val bundle = bundleOf("filterType" to "OVERDUE")
+            findNavController().navigate(R.id.action_officerHome_to_officerQueue, bundle)
+        }
+
         binding.btnViewQueue.setOnClickListener {
             findNavController().navigate(R.id.action_officerHome_to_officerQueue)
         }
 
-        // Set click listener on 'Log Out' button to clear user session and clear backstack to Welcome screen
-        binding.btnOfficerLogout.setOnClickListener {
-            SessionManager.logout() // Clear stored user session in SessionManager
-            findNavController().navigate(R.id.action_global_to_welcome) // Navigate to Welcome screen
+        binding.tvNeedsAttentionSeeAll.setOnClickListener {
+            findNavController().navigate(R.id.officerReportQueueFragment)
+        }
+
+        binding.tvAssignedSeeAll.setOnClickListener {
+            findNavController().navigate(R.id.officerAssignedFragment)
         }
     }
 
-    // Helper method to fetch calculated metric counts from ReportRepository and update UI text boxes
-    private fun refreshDashboardMetrics(officerId: Int) {
-        // Incoming: total SUBMITTED reports awaiting initial review
-        binding.tvCountIncoming.text = ReportRepository.getSubmittedCount().toString()
-        // Assigned: total active (unresolved) reports assigned specifically to this logged-in officer
-        binding.tvCountAssigned.text = ReportRepository.getAssignedToOfficerCount(officerId).toString()
-        // In Progress: total reports currently being acted upon
-        binding.tvCountInProgress.text = ReportRepository.getInProgressCount().toString()
-        // Unresolved: total reports in system that are not yet RESOLVED
-        binding.tvCountUnresolved.text = ReportRepository.getUnresolvedCount().toString()
-        // Overdue: total reports created over 7 days ago that remain unresolved
-        binding.tvCountOverdue.text = ReportRepository.getOverdueCount().toString()
+    override fun onResume() {
+        super.onResume()
+        if (_binding != null && SessionManager.isLoggedIn) {
+            updateDashboard()
+        }
     }
 
-    // Lifecycle hook called when the Fragment's view is being destroyed
+    private fun setupRecyclerViews() {
+        needsAttentionAdapter = OfficerReportAdapter(emptyList()) { report ->
+            openReportDetails(report.id)
+        }
+        binding.rvNeedsAttention.layoutManager = LinearLayoutManager(requireContext())
+        binding.rvNeedsAttention.isNestedScrollingEnabled = false
+        binding.rvNeedsAttention.adapter = needsAttentionAdapter
+
+        assignedAdapter = OfficerReportAdapter(emptyList()) { report ->
+            openReportDetails(report.id)
+        }
+        binding.rvAssignedToMe.layoutManager = LinearLayoutManager(requireContext())
+        binding.rvAssignedToMe.isNestedScrollingEnabled = false
+        binding.rvAssignedToMe.adapter = assignedAdapter
+    }
+
+    private fun showGreeting() {
+        val fullName = SessionManager.currentUser?.fullName ?: ""
+        val firstName = fullName.trim().substringBefore(" ")
+        binding.tvGreeting.text = "Hello, $firstName"
+    }
+
+    private fun updateDashboard() {
+        val user = SessionManager.currentUser ?: return
+
+        binding.tvCountIncoming.text = ReportRepository.getSubmittedCount().toString()
+        binding.tvCountAssigned.text =
+            ReportRepository.getAssignedToOfficerCount(user.id).toString()
+        binding.tvCountInProgress.text = ReportRepository.getInProgressCount().toString()
+        binding.tvCountUnresolved.text = ReportRepository.getUnresolvedCount().toString()
+        binding.tvCountOverdue.text = ReportRepository.getOverdueCount().toString()
+
+        showNeedsAttention()
+        showAssignedToMe(user.id)
+    }
+
+    private fun showNeedsAttention() {
+        val reports = ReportRepository.getAllReports()
+            .filter { it.status == ReportStatus.SUBMITTED }
+            .sortedBy { it.createdAt }
+            .take(3)
+
+        needsAttentionAdapter?.updateReports(reports)
+
+        val hasReports = reports.isNotEmpty()
+        binding.rvNeedsAttention.visibility = if (hasReports) View.VISIBLE else View.GONE
+        binding.cardNeedsAttentionEmpty.visibility =
+            if (hasReports) View.GONE else View.VISIBLE
+    }
+
+    private fun showAssignedToMe(officerId: Int) {
+        val reports = ReportRepository.getAllReports()
+            .filter { it.assignedOfficerId == officerId }
+            .sortedByDescending { it.createdAt }
+            .take(3)
+
+        assignedAdapter?.updateReports(reports)
+
+        val hasReports = reports.isNotEmpty()
+        binding.rvAssignedToMe.visibility = if (hasReports) View.VISIBLE else View.GONE
+        binding.cardAssignedEmpty.visibility =
+            if (hasReports) View.GONE else View.VISIBLE
+    }
+
+    private fun openReportDetails(reportId: String) {
+        val bundle = bundleOf("reportId" to reportId)
+        findNavController().navigate(
+            R.id.action_officerQueue_to_officerDetails,
+            bundle
+        )
+    }
+
     override fun onDestroyView() {
+        binding.rvNeedsAttention.adapter = null
+        binding.rvAssignedToMe.adapter = null
+        needsAttentionAdapter = null
+        assignedAdapter = null
         super.onDestroyView()
-        // Nullify binding reference to prevent memory leaks when Fragment view is destroyed
         _binding = null
     }
 }
