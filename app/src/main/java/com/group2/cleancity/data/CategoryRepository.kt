@@ -1,12 +1,19 @@
-
 package com.group2.cleancity.data
 
+import android.content.Context
+import com.group2.cleancity.data.db.AppDatabase
+import com.group2.cleancity.data.db.CategoryDao
+import com.group2.cleancity.data.db.CategoryEntity
 import com.group2.cleancity.model.Category
 import com.group2.cleancity.model.Priority
 
+/**
+ * Singleton repository for managing sanitation issue categories.
+ */
 object CategoryRepository {
 
-    private val categories = mutableListOf(
+    private var categoryDao: CategoryDao? = null
+    private val fallbackCategories = mutableListOf(
         Category(
             id = 1,
             name = "Uncollected Garbage",
@@ -39,12 +46,37 @@ object CategoryRepository {
         )
     )
 
+    fun init(context: Context) {
+        if (categoryDao == null) {
+            val db = AppDatabase.getInstance(context)
+            categoryDao = db.categoryDao()
+            seedIfNeeded()
+        }
+    }
+
+    private fun seedIfNeeded() {
+        val dao = categoryDao ?: return
+        if (dao.getAll().isEmpty()) {
+            for (c in fallbackCategories) {
+                dao.insert(CategoryEntity.toEntity(c))
+            }
+        }
+    }
+
     fun getCategories(): List<Category> {
-        return categories.toList()
+        val dao = categoryDao
+        if (dao != null) {
+            return dao.getAll().map { it.toModel() }
+        }
+        return fallbackCategories.toList()
     }
 
     fun getCategoryById(id: Int): Category? {
-        return categories.find { it.id == id }
+        val dao = categoryDao
+        if (dao != null) {
+            return dao.getById(id)?.toModel()
+        }
+        return fallbackCategories.find { it.id == id }
     }
 
     fun getCategoryById(id: String): Category? {
@@ -58,22 +90,27 @@ object CategoryRepository {
     ): String? {
         if (name.isBlank()) return "Category name is required"
 
-        if (categories.any {
+        val currentCategories = getCategories()
+        if (currentCategories.any {
                 it.name.equals(name.trim(), ignoreCase = true)
             }) {
             return "This category already exists"
         }
 
-        val newId = (categories.maxOfOrNull { it.id } ?: 0) + 1
-
-        categories.add(
-            Category(
-                id = newId,
-                name = name.trim(),
-                description = description.trim(),
-                defaultPriority = priority
-            )
+        val newId = (currentCategories.maxOfOrNull { it.id } ?: 0) + 1
+        val newCategory = Category(
+            id = newId,
+            name = name.trim(),
+            description = description.trim(),
+            defaultPriority = priority
         )
+
+        val dao = categoryDao
+        if (dao != null) {
+            dao.insert(CategoryEntity.toEntity(newCategory))
+        } else {
+            fallbackCategories.add(newCategory)
+        }
 
         return null
     }
@@ -82,22 +119,30 @@ object CategoryRepository {
         categoryId: Int,
         newPriority: Priority
     ): String? {
-        val index = categories.indexOfFirst { it.id == categoryId }
+        val category = getCategoryById(categoryId) ?: return "Category not found"
+        val updatedCategory = category.copy(defaultPriority = newPriority)
 
-        if (index == -1) return "Category not found"
-
-        categories[index] = categories[index].copy(
-            defaultPriority = newPriority
-        )
+        val dao = categoryDao
+        if (dao != null) {
+            dao.update(CategoryEntity.toEntity(updatedCategory))
+        } else {
+            val index = fallbackCategories.indexOfFirst { it.id == categoryId }
+            if (index != -1) fallbackCategories[index] = updatedCategory
+        }
 
         return null
     }
 
     fun deleteCategory(categoryId: Int): String? {
-        val category = categories.find { it.id == categoryId }
+        val category = getCategoryById(categoryId)
             ?: return "Category not found"
 
-        categories.remove(category)
+        val dao = categoryDao
+        if (dao != null) {
+            dao.delete(CategoryEntity.toEntity(category))
+        } else {
+            fallbackCategories.remove(category)
+        }
         return null
     }
 }
