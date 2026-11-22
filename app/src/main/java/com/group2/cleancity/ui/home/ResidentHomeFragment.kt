@@ -5,13 +5,12 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.group2.cleancity.R
-import com.group2.cleancity.data.ReportRepository
 import com.group2.cleancity.data.SessionManager
 import com.group2.cleancity.databinding.FragmentResidentHomeBinding
-import com.group2.cleancity.model.ReportStatus
 import com.group2.cleancity.model.Role
 import com.group2.cleancity.ui.report.MyReportAdapter
 
@@ -21,6 +20,7 @@ class ResidentHomeFragment : Fragment() {
     private val binding get() = _binding!!
 
     private var reportAdapter: MyReportAdapter? = null
+    private val viewModel: ResidentHomeViewModel by viewModels()
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -41,8 +41,8 @@ class ResidentHomeFragment : Fragment() {
         }
 
         setupRecyclerView()
-        showGreeting()
-        updateDashboard()
+        observeViewModel()
+        viewModel.loadResidentData()
 
         // Slice 3: open the report form (green card and the + button)
         binding.cardReport.setOnClickListener {
@@ -67,50 +67,51 @@ class ResidentHomeFragment : Fragment() {
         binding.recyclerRecentReports.adapter = reportAdapter
     }
 
+    private fun observeViewModel() {
+        viewModel.greeting.observe(viewLifecycleOwner) { greetingText ->
+            binding.tvGreeting.text = greetingText
+        }
+        viewModel.totalCount.observe(viewLifecycleOwner) { count ->
+            binding.tvCountTotal.text = count
+        }
+        viewModel.inProgressCount.observe(viewLifecycleOwner) { count ->
+            binding.tvCountInProgress.text = count
+        }
+        viewModel.resolvedCount.observe(viewLifecycleOwner) { count ->
+            binding.tvCountResolved.text = count
+        }
+        viewModel.recentReports.observe(viewLifecycleOwner) { recentReports ->
+            val adapter = reportAdapter ?: return@observe
+            adapter.submitReports(recentReports)
+
+            val hasReports = recentReports.isNotEmpty()
+            binding.recyclerRecentReports.visibility = if (hasReports) View.VISIBLE else View.GONE
+            binding.tvRecentEmpty.visibility = if (hasReports) View.GONE else View.VISIBLE
+        }
+    }
+
     // Refresh the numbers and recent reports when returning to this screen
     override fun onResume() {
         super.onResume()
         if (_binding != null && SessionManager.isLoggedIn) {
-            updateDashboard()
+            viewModel.loadResidentData()
         }
     }
 
     private fun updateDashboard() {
-        showCounts()
-        showRecentReports()
+        viewModel.loadResidentData()
     }
 
     private fun showGreeting() {
-        val fullName = SessionManager.currentUser?.fullName ?: ""
-        // "Demo Resident" -> "Demo"
-        val firstName = fullName.trim().substringBefore(" ")
-        binding.tvGreeting.text = "Hello, $firstName"
+        viewModel.loadResidentData()
     }
 
     private fun showCounts() {
-        val user = SessionManager.currentUser ?: return
-        val myReports = ReportRepository.getReportsByReporter(user.id)
-
-        binding.tvCountTotal.text = myReports.size.toString()
-        binding.tvCountInProgress.text =
-            myReports.count { it.status == ReportStatus.IN_PROGRESS }.toString()
-        binding.tvCountResolved.text =
-            myReports.count { it.status == ReportStatus.RESOLVED }.toString()
+        viewModel.loadResidentData()
     }
 
     private fun showRecentReports() {
-        val user = SessionManager.currentUser ?: return
-        val adapter = reportAdapter ?: return
-
-        val recentReports = ReportRepository.getReportsByReporter(user.id)
-            .sortedByDescending { it.createdAt }
-            .take(3)
-
-        adapter.submitReports(recentReports)
-
-        val hasReports = recentReports.isNotEmpty()
-        binding.recyclerRecentReports.visibility = if (hasReports) View.VISIBLE else View.GONE
-        binding.tvRecentEmpty.visibility = if (hasReports) View.GONE else View.VISIBLE
+        viewModel.loadResidentData()
     }
 
     override fun onDestroyView() {
