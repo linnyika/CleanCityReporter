@@ -13,6 +13,7 @@ import com.group2.cleancity.data.SessionManager
 import com.group2.cleancity.databinding.FragmentResidentHomeBinding
 import com.group2.cleancity.model.Role
 import com.group2.cleancity.ui.report.MyReportAdapter
+import com.group2.cleancity.util.NameFormat
 
 class ResidentHomeFragment : Fragment() {
 
@@ -103,7 +104,8 @@ class ResidentHomeFragment : Fragment() {
     }
 
     private fun showGreeting() {
-        viewModel.loadResidentData()
+        val fullName = SessionManager.currentUser?.fullName ?: ""
+        binding.tvGreeting.text = "Hello, ${NameFormat.displayName(fullName)}"
     }
 
     private fun showCounts() {

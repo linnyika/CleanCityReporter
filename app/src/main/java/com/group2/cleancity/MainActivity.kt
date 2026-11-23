@@ -52,7 +52,17 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         SessionManager.init(this)
-        SessionManager.restore()
+
+        val openedFromNotification = intent.getStringExtra("open_report_id") != null
+        if (savedInstanceState == null) {
+            if (openedFromNotification) {
+                SessionManager.restore()
+                openHomeIfLoggedIn()
+            } else {
+                SessionManager.logout()
+            }
+        }
+
         setContentView(R.layout.activity_main)
 
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { view, insets ->
@@ -66,7 +76,6 @@ class MainActivity : AppCompatActivity() {
         NotificationHelper.createChannel(this)
         requestNotificationPermissionOnceForResident()
 
-        if (savedInstanceState == null) openHomeIfLoggedIn()
         handleOpenReportIntent(intent)
     }
 
@@ -150,6 +159,10 @@ class MainActivity : AppCompatActivity() {
         }
 
         navController.addOnDestinationChangedListener { _, destination, _ ->
+            if (destination.id == R.id.residentHomeFragment) {
+                postResidentNotifications()
+            }
+
             val (menuResId, tabDestinations) = when (SessionManager.role) {
                 Role.RESIDENT -> Pair(
                     R.menu.menu_resident,
