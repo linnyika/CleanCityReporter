@@ -20,6 +20,7 @@ import com.group2.cleancity.databinding.FragmentAdminHomeBinding
 import com.group2.cleancity.model.ReportStatus
 import com.group2.cleancity.model.Role
 import com.group2.cleancity.ui.officer.OfficerReportAdapter
+import com.group2.cleancity.util.NameFormat
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -94,8 +95,7 @@ class AdminHomeFragment : Fragment() {
 
     private fun showGreeting() {
         val fullName = SessionManager.currentUser?.fullName ?: ""
-        val firstName = fullName.trim().substringBefore(" ")
-        binding.tvGreeting.text = "Hello, $firstName"
+        binding.tvGreeting.text = "Hello, ${NameFormat.displayName(fullName)}"
     }
 
     private fun displayDashboard() {
